@@ -87,16 +87,17 @@ public class GrpcServer implements RpcServer {
             throw new IllegalStateException("grpc server has started");
         }
 
+        final String name = "grpc-default-executor";
         this.defaultExecutor = ThreadPoolUtil.newBuilder() //
-            .poolName("grpc-default-executor") //
+            .poolName(name) //
             .enableMetric(true) //
             .coreThreads(Math.min(20, GrpcRaftRpcFactory.RPC_SERVER_PROCESSOR_POOL_SIZE / 5)) //
             .maximumThreads(GrpcRaftRpcFactory.RPC_SERVER_PROCESSOR_POOL_SIZE) //
             .keepAliveSeconds(60L) //
             .workQueue(new SynchronousQueue<>()) //
-            .threadFactory(new NamedThreadFactory("grpc-default-executor-", true)) //
+            .threadFactory(new NamedThreadFactory(name + "-", true)) //
             .rejectedHandler((r, executor) -> {
-                throw new RejectedExecutionException("[grpc-default-executor], task " + r.toString() +
+                throw new RejectedExecutionException("[" + name + "], task " + r.toString() +
                         " rejected from " +
                         executor.toString());
             })
